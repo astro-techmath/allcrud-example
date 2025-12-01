@@ -6,9 +6,6 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 
-/**
- * Category entity - demonstrates String as ID type (business key)
- */
 @Entity
 @Table(name = "category_tb")
 @Getter @Setter

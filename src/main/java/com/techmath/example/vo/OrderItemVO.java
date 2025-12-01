@@ -12,12 +12,26 @@ import java.util.UUID;
 @EqualsAndHashCode(callSuper = false) @ToString
 public class OrderItemVO implements AbstractEntityVO<OrderItemId> {
 
-    private OrderItemId id;
-
     private UUID orderId;
     private UUID bookId;
 
     private Integer quantity;
     private BigDecimal unitPrice;
+
+    @Override
+    public OrderItemId getId() {
+        if (orderId != null && bookId != null) {
+            return new OrderItemId(orderId, bookId);
+        }
+        return null;
+    }
+
+    @Override
+    public void setId(OrderItemId id) {
+        if (id != null) {
+            this.orderId = id.getOrderId();
+            this.bookId = id.getBookId();
+        }
+    }
 
 }

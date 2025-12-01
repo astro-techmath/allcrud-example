@@ -23,7 +23,7 @@ INSERT INTO order_tb (id, customer_name, order_date) VALUES
 ('00de1111-1111-1111-1111-111111111111', 'Alice Wonderland', NOW()),
 ('00de2222-2222-2222-2222-222222222222', 'Bob Builder', DATEADD('DAY', -2, NOW()));
 
--- Order Items
+-- Order Items (Composite Key: order_id + book_id)
 INSERT INTO order_item_tb (order_id, book_id, quantity, unit_price) VALUES
 -- Alice's order (Bought 1984 and Foundation)
 ('00de1111-1111-1111-1111-111111111111', 'b00c1111-1111-1111-1111-111111111111', 1, 15.99),

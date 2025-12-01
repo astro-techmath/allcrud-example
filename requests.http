@@ -85,7 +85,7 @@ Content-Type: application/json
   "bio": "Partial update - only changing the bio field"
 }
 
-### 6. Delete author
+### 6. Delete author (soft delete - sets active=false)
 DELETE http://localhost:8080/authors/4
 
 ### 7. Filter active authors
@@ -180,6 +180,33 @@ Accept: application/json
 ### 10. Complex filtering with pagination
 GET http://localhost:8080/books?categoryId=FICTION&page=0&size=5&orderBy=title&direction=ASC
 Accept: application/json
+
+###############################################################################
+
+### OrderItems Endpoints (Composite Key)
+
+### 1. List all order items
+GET http://localhost:8080/order-items
+Accept: application/json
+
+### 2. Get order item by composite ID (Base64URL encoded)
+# The ID must be Base64URL encoded JSON: {"orderId":"uuid","bookId":"uuid"}
+GET http://localhost:8080/order-items/eyJvcmRlcklkIjoiMDBkZTExMTEtMTExMS0xMTExLTExMTEtMTExMTExMTExMTExIiwiYm9va0lkIjoiYjAwYzExMTEtMTExMS0xMTExLTExMTEtMTExMTExMTExMTExIn0
+Accept: application/json
+
+### 3. Create new order item
+POST http://localhost:8080/order-items
+Content-Type: application/json
+
+{
+  "orderId": "00de1111-1111-1111-1111-111111111111",
+  "bookId": "b00c2222-2222-2222-2222-222222222222",
+  "quantity": 3,
+  "unitPrice": 12.99
+}
+
+### 4. Delete order item
+DELETE http://localhost:8080/order-items/eyJvcmRlcklkIjoiMDBkZTExMTEtMTExMS0xMTExLTExMTEtMTExMTExMTExMTExIiwiYm9va0lkIjoiYjAwYzExMTEtMTExMS0xMTExLTExMTEtMTExMTExMTExMTExIn0
 
 ###############################################################################
 

@@ -16,12 +16,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
-/**
- * Author entity - demonstrates Long ID type and SoftDeletable
- */
 @Entity
 @Table(name = "author_tb")
+@SQLDelete(sql = "UPDATE author_tb SET active = false WHERE id = ?")
+@SQLRestriction("active = true")
 @Getter @Setter
 @NoArgsConstructor @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false) @ToString

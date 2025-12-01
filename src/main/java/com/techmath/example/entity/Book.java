@@ -9,9 +9,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.UUID;
 
-/**
- * Book entity - demonstrates UUID as ID type
- */
 @Entity
 @Table(name = "book_tb")
 @Getter @Setter
