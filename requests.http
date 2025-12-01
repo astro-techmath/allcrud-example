@@ -1,0 +1,260 @@
+### Categories Endpoints
+
+### 1. List all categories
+GET http://localhost:8080/categories
+Accept: application/json
+
+### 2. Get category by ID
+GET http://localhost:8080/categories/FICTION
+Accept: application/json
+
+### 3. Create new category
+POST http://localhost:8080/categories
+Content-Type: application/json
+
+{
+  "id": "ROMANCE",
+  "name": "Romance",
+  "description": "Romantic novels and stories"
+}
+
+### 4. Update category (full)
+PUT http://localhost:8080/categories/ROMANCE
+Content-Type: application/json
+
+{
+  "id": "ROMANCE",
+  "name": "Romance Updated",
+  "description": "Updated description for romantic books"
+}
+
+### 5. Update category (partial)
+PATCH http://localhost:8080/categories/ROMANCE
+Content-Type: application/json
+
+{
+  "description": "Only updating the description field"
+}
+
+### 6. Delete category
+DELETE http://localhost:8080/categories/ROMANCE
+
+### 7. List with pagination
+GET http://localhost:8080/categories?page=0&size=2&orderBy=name&direction=ASC
+Accept: application/json
+
+###############################################################################
+
+### Authors Endpoints (Long ID)
+
+### 1. List all authors
+GET http://localhost:8080/authors
+Accept: application/json
+
+### 2. Get author by ID
+GET http://localhost:8080/authors/1
+Accept: application/json
+
+### 3. Create new author
+POST http://localhost:8080/authors
+Content-Type: application/json
+
+{
+  "name": "J.K. Rowling",
+  "email": "jk@example.com",
+  "bio": "British author, best known for Harry Potter series",
+  "active": true
+}
+
+### 4. Update author (full)
+PUT http://localhost:8080/authors/4
+Content-Type: application/json
+
+{
+  "name": "J.K. Rowling Updated",
+  "email": "jk.rowling@example.com",
+  "bio": "Updated biography",
+  "active": true
+}
+
+### 5. Update author (partial) - only bio
+PATCH http://localhost:8080/authors/4
+Content-Type: application/json
+
+{
+  "bio": "Partial update - only changing the bio field"
+}
+
+### 6. Delete author
+DELETE http://localhost:8080/authors/4
+
+### 7. Filter active authors
+GET http://localhost:8080/authors?active=true
+Accept: application/json
+
+### 8. Filter by name (case-insensitive)
+GET http://localhost:8080/authors?name=orwell
+Accept: application/json
+
+### 9. Pagination with sorting
+GET http://localhost:8080/authors?page=0&size=2&orderBy=name&direction=DESC
+Accept: application/json
+
+###############################################################################
+
+### Books Endpoints (UUID + Custom Validations)
+
+### 1. List all books
+GET http://localhost:8080/books
+Accept: application/json
+
+### 2. Get book by ID (use a valid UUID from previous GET)
+# Replace {uuid} with actual UUID from database
+GET http://localhost:8080/books/{uuid}
+Accept: application/json
+
+### 3. Create new book
+POST http://localhost:8080/books
+Content-Type: application/json
+
+{
+  "title": "The Great Gatsby",
+  "isbn": "978-0-7432-7356-5",
+  "price": 14.99,
+  "pages": 180,
+  "publicationDate": "1925-04-10",
+  "description": "A classic American novel set in Jazz Age",
+  "authorId": 1,
+  "categoryId": "FICTION"
+}
+
+### 4. Create book with inactive author (should fail with 422)
+POST http://localhost:8080/books
+Content-Type: application/json
+
+{
+  "title": "Test Book",
+  "isbn": "978-0-1234-5678-9",
+  "price": 19.99,
+  "pages": 200,
+  "publicationDate": "2024-01-01",
+  "description": "This should fail if author is inactive",
+  "authorId": 999,
+  "categoryId": "FICTION"
+}
+
+### 5. Update book (full) - replace {uuid}
+PUT http://localhost:8080/books/{uuid}
+Content-Type: application/json
+
+{
+  "title": "The Great Gatsby - Special Edition",
+  "isbn": "978-0-7432-7356-5",
+  "price": 19.99,
+  "pages": 180,
+  "publicationDate": "1925-04-10",
+  "description": "Updated special edition",
+  "authorId": 1,
+  "categoryId": "FICTION"
+}
+
+### 6. Update book (partial) - only price
+PATCH http://localhost:8080/books/{uuid}
+Content-Type: application/json
+
+{
+  "price": 12.99
+}
+
+### 7. Delete book (hard delete)
+DELETE http://localhost:8080/books/{uuid}
+
+### 8. Filter by category
+GET http://localhost:8080/books?categoryId=FICTION
+Accept: application/json
+
+### 9. Filter by title (case-insensitive)
+GET http://localhost:8080/books?title=foundation
+Accept: application/json
+
+### 10. Complex filtering with pagination
+GET http://localhost:8080/books?categoryId=FICTION&page=0&size=5&orderBy=title&direction=ASC
+Accept: application/json
+
+###############################################################################
+
+### Validation Examples (should return 400 Bad Request)
+
+### Invalid category - ID too short
+POST http://localhost:8080/categories
+Content-Type: application/json
+
+{
+  "id": "A",
+  "name": "Test"
+}
+
+### Invalid author - name too short
+POST http://localhost:8080/authors
+Content-Type: application/json
+
+{
+  "name": "AB",
+  "email": "test@example.com"
+}
+
+### Invalid book - missing required fields
+POST http://localhost:8080/books
+Content-Type: application/json
+
+{
+  "title": "Test Book"
+}
+
+### Invalid book - negative price
+POST http://localhost:8080/books
+Content-Type: application/json
+
+{
+  "title": "Test Book",
+  "isbn": "978-0-1234-5678-9",
+  "price": -10.00,
+  "pages": 100,
+  "authorId": 1,
+  "categoryId": "FICTION"
+}
+
+### Invalid book - invalid email format
+POST http://localhost:8080/authors
+Content-Type: application/json
+
+{
+  "name": "Test Author",
+  "email": "invalid-email"
+}
+
+###############################################################################
+
+### Error Handling Examples
+
+### 404 - Not Found
+GET http://localhost:8080/authors/99999
+Accept: application/json
+
+### 404 - Category not found
+GET http://localhost:8080/categories/NONEXISTENT
+Accept: application/json
+
+### 422 - Business rule violation (non-existent author)
+POST http://localhost:8080/books
+Content-Type: application/json
+
+{
+  "title": "Test Book",
+  "isbn": "978-0-1234-5678-9",
+  "price": 19.99,
+  "pages": 200,
+  "publicationDate": "2024-01-01",
+  "authorId": 99999,
+  "categoryId": "FICTION"
+}
