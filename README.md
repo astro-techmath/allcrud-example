@@ -1,91 +1,132 @@
 # Allcrud Example Project
 
-Este é um projeto exemplo demonstrando o uso da biblioteca **Allcrud** em um cenário real de gerenciamento de livros.
+A comprehensive example project demonstrating the **Allcrud** library in a real-world book management scenario.
 
-## 📚 Sobre o Projeto
+## 📚 About This Project
 
-Este exemplo implementa um sistema simples de biblioteca com três entidades principais:
+This example implements a simple library management system with five main entities:
 
-- **Author** (Autor) - Usa `Long` como ID e demonstra soft delete
-- **Book** (Livro) - Usa `UUID` como ID e demonstra validações customizadas
-- **Category** (Categoria) - Usa `String` como ID (chave de negócio)
+- **Author** - Uses `Long` as ID and demonstrates soft delete with `@SQLDelete`
+- **Book** - Uses `UUID` as ID and demonstrates custom business validations
+- **Category** - Uses `String` as ID (business key like "FICTION", "SCIENCE")
+- **Order** - Uses `UUID` as ID for customer orders
+- **OrderItem** - Uses **Composite Key** (`orderId` + `bookId`) demonstrating many-to-many relationships
 
-## ✨ Recursos Demonstrados
+## ✨ Features Demonstrated
 
-### 1. Diferentes Tipos de ID
-- `Long` para Author (auto-incremento tradicional)
-- `UUID` para Book (identificador único universal)
-- `String` para Category (código de negócio como "FICTION", "SCIENCE")
+### 1. Multiple ID Types
+- **Long** (Author) - Traditional auto-increment
+- **UUID** (Book, Order) - Universal unique identifier
+- **String** (Category) - Business key approach
+- **Composite Key** (OrderItem) - Multi-field primary key with Base64URL encoding
 
-### 2. Validações Customizadas
-O `BookService` adiciona validações de negócio:
-- Verifica se o autor existe e está ativo
-- Valida a existência da categoria
-- Demonstra como estender o comportamento padrão
+### 2. Custom Business Validations
+The `BookService` adds business rule validations:
+- Validates that the author exists and is active
+- Validates that the category exists
+- Demonstrates how to extend default behavior with domain logic
 
-### 3. Auditoria Automática
-A entidade `Author` estende `AuditableEntity`, que automaticamente registra:
-- Data de criação
-- Usuário que criou
-- Data da última modificação
-- Usuário que modificou
+### 3. Soft Delete with Hibernate
+The `Author` entity demonstrates soft delete using Hibernate's native annotations:
+```java
+@Entity
+@SQLDelete(sql = "UPDATE author_tb SET active = false WHERE id = ?")
+@SQLRestriction(clause = "active = true")
+public class Author extends AuditableEntity<Long> {
+    @Column(nullable = false)
+    private Boolean active = true;
+}
+```
 
-### 4. Relacionamentos JPA
+When you DELETE an author:
+- ✅ SQL UPDATE is executed instead of DELETE
+- ✅ Author is marked as `active = false`
+- ✅ Future queries automatically exclude inactive authors (via `@SQLRestriction`)
+- ✅ Author still exists in database for audit purposes
+
+### 4. Automatic Auditing
+The `Author` entity extends `AuditableEntity`, which automatically tracks:
+- Creation date and user
+- Last modification date and user
+- All managed by Spring Data JPA's `@EntityListeners(AuditingEntityListener.class)`
+
+### 5. JPA Relationships
 - Author 1:N Book
 - Category 1:N Book
+- Order 1:N OrderItem
+- Book 1:N OrderItem
 
-### 5. Testes Completos
-Três níveis de testes usando as classes base da Allcrud:
-- **Service Tests** - Testes unitários do serviço
-- **Controller Integration Tests** - Testes de integração completos
+### 6. Composite Key Support
+The `OrderItem` entity demonstrates how to work with composite keys:
+- **Entity**: Uses `@EmbeddedId` with `OrderItemId`
+- **Converter**: `StringToOrderItemIdConverter` extends `AbstractCompositeIdConverter`
+- **REST API**: IDs are Base64URL-encoded JSON (e.g., `eyJvcmRlcklkIjoi...`)
 
-## 🚀 Como Executar
+### 7. Comprehensive Testing
+Two levels of testing using Allcrud's base classes:
+- **Service Tests** - Unit tests with mocked repository
+- **Controller Integration Tests** - Full-stack tests with real PostgreSQL (Testcontainers)
 
-### Pré-requisitos
+## 🚀 Getting Started
+
+### Prerequisites
 - Java 21+
 - Gradle 8.7+
+- Docker (for integration tests)
 
-### Instalação da Allcrud
+### Installation
 
-Antes de executar este exemplo, você precisa ter a biblioteca Allcrud instalada localmente:
-
+**Option A: Install Allcrud locally (for development)**
 ```bash
 cd /path/to/allcrud
 ./gradlew publishToMavenLocal
 ```
 
-### Executando o Projeto
+**Option B: Use from Maven Central (when published)**
+```gradle
+dependencies {
+    implementation 'com.techmath:allcrud:0.1.0-beta'
+}
+```
+
+### Running the Application
 
 ```bash
 cd allcrud-example
 ./gradlew bootRun
 ```
 
-A aplicação estará disponível em `http://localhost:8080`
+The application will be available at `http://localhost:8080`
 
-### Acessando o H2 Console
+### Accessing H2 Console
 
-O projeto usa H2 em memória com dados de exemplo pré-carregados.
+The project uses H2 in-memory database with pre-loaded sample data.
 
-- URL: `http://localhost:8080/h2-console`
-- JDBC URL: `jdbc:h2:mem:allcrud_db`
-- Username: `sa`
-- Password: (deixe em branco)
+- **URL**: `http://localhost:8080/h2-console`
+- **JDBC URL**: `jdbc:h2:mem:allcrud_db`
+- **Username**: `sa`
+- **Password**: (leave blank)
 
-## 📡 Endpoints Disponíveis
+### Accessing Swagger UI
 
-Todos os endpoints seguem o padrão REST e incluem operações CRUD completas.
+Interactive API documentation is available at:
+- **Swagger UI**: `http://localhost:8080/swagger-ui.html`
+- **OpenAPI JSON**: `http://localhost:8080/api-docs`
+
+## 📡 Available Endpoints
+
+All endpoints follow RESTful principles and include complete CRUD operations.
 
 ### Categories (String ID)
 
 ```bash
-# Listar todas as categorias (paginado)
+# List all categories (paginated)
 GET http://localhost:8080/categories
 
-# Buscar por ID
+# Get by ID
 GET http://localhost:8080/categories/FICTION
 
-# Criar nova categoria
+# Create new category
 POST http://localhost:8080/categories
 Content-Type: application/json
 
@@ -95,7 +136,7 @@ Content-Type: application/json
   "description": "Romantic novels and stories"
 }
 
-# Atualizar categoria (completo)
+# Full update
 PUT http://localhost:8080/categories/ROMANCE
 Content-Type: application/json
 
@@ -105,7 +146,7 @@ Content-Type: application/json
   "description": "Updated description"
 }
 
-# Atualizar categoria (parcial)
+# Partial update
 PATCH http://localhost:8080/categories/ROMANCE
 Content-Type: application/json
 
@@ -113,26 +154,26 @@ Content-Type: application/json
   "description": "Only updating description"
 }
 
-# Deletar categoria
+# Delete category
 DELETE http://localhost:8080/categories/ROMANCE
 ```
 
-### Authors (Long ID com Soft Delete)
+### Authors (Long ID with Soft Delete)
 
 ```bash
-# Listar todos os autores
+# List all authors (only active ones due to @SQLRestriction)
 GET http://localhost:8080/authors
 
-# Filtrar autores ativos
+# Filter active authors explicitly
 GET http://localhost:8080/authors?active=true
 
-# Paginação e ordenação
+# Pagination and sorting
 GET http://localhost:8080/authors?page=0&size=10&orderBy=name&direction=ASC
 
-# Buscar por ID
+# Get by ID
 GET http://localhost:8080/authors/1
 
-# Criar novo autor
+# Create new author
 POST http://localhost:8080/authors
 Content-Type: application/json
 
@@ -143,7 +184,7 @@ Content-Type: application/json
   "active": true
 }
 
-# Atualizar autor
+# Update author
 PUT http://localhost:8080/authors/1
 Content-Type: application/json
 
@@ -154,20 +195,22 @@ Content-Type: application/json
   "active": true
 }
 
-# Deletar autor (soft delete - marca como inativo)
+# Delete author (soft delete - marks as inactive)
 DELETE http://localhost:8080/authors/1
+# After this, author still exists in DB but active=false
+# GET requests won't return it anymore (filtered by @SQLRestriction)
 ```
 
-### Books (UUID ID com Validações)
+### Books (UUID ID with Custom Validations)
 
 ```bash
-# Listar todos os livros
+# List all books
 GET http://localhost:8080/books
 
-# Filtrar por categoria
+# Filter by category
 GET http://localhost:8080/books?categoryId=FICTION
 
-# Criar novo livro
+# Create new book
 POST http://localhost:8080/books
 Content-Type: application/json
 
@@ -182,7 +225,7 @@ Content-Type: application/json
   "categoryId": "FICTION"
 }
 
-# Atualizar livro
+# Update book
 PUT http://localhost:8080/books/{uuid}
 Content-Type: application/json
 
@@ -197,36 +240,85 @@ Content-Type: application/json
   "categoryId": "FICTION"
 }
 
-# Deletar livro (hard delete)
+# Delete book (hard delete)
 DELETE http://localhost:8080/books/{uuid}
 ```
 
-## 🧪 Executando os Testes
+### Orders (UUID ID)
 
 ```bash
-# Todos os testes
-./gradlew test
+# List all orders
+GET http://localhost:8080/orders
 
-# Apenas testes de serviço
-./gradlew test --tests "*ServiceTest"
+# Get order by ID
+GET http://localhost:8080/orders/{uuid}
 
-# Apenas testes de controller
-./gradlew test --tests "*ControllerTest"
+# Create new order
+POST http://localhost:8080/orders
+Content-Type: application/json
 
-# Apenas testes de integração
-./gradlew test --tests "*IntegrationTest"
+{
+  "customerName": "John Doe",
+  "orderDate": "2024-01-15T10:30:00"
+}
+
+# Delete order
+DELETE http://localhost:8080/orders/{uuid}
 ```
 
-## 📊 Headers de Paginação
+### Order Items (Composite Key)
 
-Quando você faz uma requisição GET paginada, a resposta inclui os seguintes headers:
+**Important**: Composite key IDs must be Base64URL-encoded JSON.
 
-- `currentPage` - Página atual (zero-based)
-- `currentElements` - Número de elementos na página atual
-- `totalElements` - Total de elementos encontrados
-- `totalPages` - Total de páginas
+```bash
+# List all order items
+GET http://localhost:8080/order-items
 
-Exemplo:
+# Get by composite ID (Base64URL encoded)
+# ID format: {"orderId":"uuid","bookId":"uuid"}
+# Encoded: eyJvcmRlcklkIjoiMDBkZTExMTEtMTExMS0xMTExLTExMTEtMTExMTExMTExMTExIiwiYm9va0lkIjoiYjAwYzExMTEtMTExMS0xMTExLTExMTEtMTExMTExMTExMTExIn0
+GET http://localhost:8080/order-items/eyJvcmRlcklkIjoiMDBkZTExMTEtMTExMS0xMTExLTExMTEtMTExMTExMTExMTExIiwiYm9va0lkIjoiYjAwYzExMTEtMTExMS0xMTExLTExMTEtMTExMTExMTExMTExIn0
+
+# Create new order item
+POST http://localhost:8080/order-items
+Content-Type: application/json
+
+{
+  "orderId": "00de1111-1111-1111-1111-111111111111",
+  "bookId": "b00c2222-2222-2222-2222-222222222222",
+  "quantity": 3,
+  "unitPrice": 12.99
+}
+
+# Delete order item
+DELETE http://localhost:8080/order-items/eyJvcmRlcklkIjoiMDBkZTExMTEtMTExMS0xMTExLTExMTEtMTExMTExMTExMTExIiwiYm9va0lkIjoiYjAwYzExMTEtMTExMS0xMTExLTExMTEtMTExMTExMTExMTExIn0
+```
+
+## 🧪 Running Tests
+
+```bash
+# All tests
+./gradlew test
+
+# Only service tests (unit tests with mocked repository)
+./gradlew test --tests "*ServiceTests"
+
+# Only integration tests (full-stack with PostgreSQL Testcontainers)
+./gradlew test --tests "*IntegrationTests"
+```
+
+**Note**: Integration tests require Docker to be running. The first test run will download the PostgreSQL image (~80MB) and start a container (~30s). Subsequent runs reuse the container and are much faster.
+
+## 📊 Pagination Headers
+
+When making paginated GET requests, the response includes the following headers:
+
+- `currentPage` - Current page number (zero-based)
+- `currentElements` - Number of elements in current page
+- `totalElements` - Total number of elements found
+- `totalPages` - Total number of pages
+
+Example:
 ```
 currentPage: 0
 currentElements: 10
@@ -234,110 +326,213 @@ totalElements: 25
 totalPages: 3
 ```
 
-## 🎯 Códigos de Status HTTP
+## 🎯 HTTP Status Codes
 
-A biblioteca Allcrud utiliza os seguintes códigos de status:
+Allcrud uses standard RESTful status codes:
 
-- `200 OK` - Operação bem-sucedida (GET por ID, PUT, PATCH)
-- `201 Created` - Entidade criada com sucesso (POST)
-- `204 No Content` - Operação bem-sucedida sem conteúdo (DELETE, GET vazio)
-- `206 Partial Content` - Lista paginada com resultados (GET com dados)
-- `400 Bad Request` - Erro de validação
-- `404 Not Found` - Entidade não encontrada
-- `422 Unprocessable Entity` - Regra de negócio violada
+- `200 OK` - Successful operation (GET by ID, PUT, PATCH)
+- `201 Created` - Entity created successfully (POST)
+- `204 No Content` - Successful operation with no content (DELETE, empty GET)
+- `206 Partial Content` - Paginated list with results (GET with data)
+- `400 Bad Request` - Validation error
+- `404 Not Found` - Entity not found
+- `422 Unprocessable Entity` - Business rule violation
 
-## 🔍 Exemplos de Filtros
+## 🔍 Dynamic Filtering Examples
 
-A Allcrud suporta filtros dinâmicos baseados nos campos da VO:
+Allcrud supports dynamic filtering based on VO fields:
 
 ```bash
-# Filtrar autores por nome (case-insensitive)
+# Filter authors by name (case-insensitive)
 GET http://localhost:8080/authors?name=orwell
 
-# Filtrar livros por categoria
+# Filter books by category
 GET http://localhost:8080/books?categoryId=FICTION
 
-# Combinar múltiplos filtros
+# Combine multiple filters
 GET http://localhost:8080/authors?active=true&name=martin
+
+# Pagination with filters
+GET http://localhost:8080/books?categoryId=SCIENCE&page=0&size=5&orderBy=title
 ```
 
-## 📝 Dados de Exemplo
+## 📝 Sample Data
 
-O projeto inclui dados pré-carregados no arquivo `data.sql`:
+The project includes pre-loaded data in `data.sql`:
 
-**Categorias:**
-- FICTION - Fiction
-- SCIENCE - Science
-- HISTORY - History
-- TECHNOLOGY - Technology
+**Categories:**
+- FICTION - Fiction books
+- SCIENCE - Science books
+- HISTORY - History books
+- TECHNOLOGY - Technology books
 
-**Autores:**
-- George Orwell
-- Isaac Asimov
-- Martin Fowler
+**Authors:**
+- George Orwell (active)
+- Isaac Asimov (active)
+- Martin Fowler (active)
 
-**Livros:**
-- 1984 (George Orwell)
-- Animal Farm (George Orwell)
-- Foundation (Isaac Asimov)
-- Refactoring (Martin Fowler)
+**Books:**
+- 1984 by George Orwell
+- Animal Farm by George Orwell
+- Foundation by Isaac Asimov
+- Refactoring by Martin Fowler
 
-## 🏗️ Estrutura do Projeto
+**Orders:**
+- Alice Wonderland's order (2 items)
+- Bob Builder's order (1 item)
+
+**Order Items:**
+- Alice bought: 1984, Foundation (x2)
+- Bob bought: Refactoring
+
+## 🏗️ Project Structure
 
 ```
 src/main/java/com/techmath/example/
 ├── config/
-│   ├── CustomControllerAdvice.java   # Exception handling
-│   └── JpaAuditingConfig.java        # Audit configuration
+│   ├── CustomGlobalExceptionHandler.java  # Exception handling
+│   ├── JpaAuditingConfig.java             # Audit configuration
+│   └── OpenApiConfig.java                 # Swagger/OpenAPI config
 ├── controller/
-│   ├── AuthorController.java         # Long ID
-│   ├── BookController.java           # UUID
-│   └── CategoryController.java       # String ID
+│   ├── AuthorController.java              # Long ID
+│   ├── BookController.java                # UUID ID
+│   ├── CategoryController.java            # String ID
+│   ├── OrderController.java               # UUID ID
+│   └── OrderItemController.java           # Composite Key
 ├── converter/
 │   ├── AuthorConverter.java
 │   ├── BookConverter.java
-│   └── CategoryConverter.java
+│   ├── CategoryConverter.java
+│   ├── OrderConverter.java
+│   ├── OrderItemConverter.java
+│   └── StringToOrderItemIdConverter.java  # Composite Key converter
 ├── entity/
-│   ├── Author.java                   # SoftDeletable + Auditable
-│   ├── Book.java                     # Standard entity
-│   └── Category.java                 # String ID
+│   ├── Author.java                        # Soft delete + Auditable
+│   ├── Book.java                          # Standard entity
+│   ├── Category.java                      # String ID
+│   ├── Order.java                         # UUID ID
+│   ├── OrderItem.java                     # Composite Key
+│   └── pk/
+│       └── OrderItemId.java               # Composite Key class
 ├── repository/
 │   ├── AuthorRepository.java
 │   ├── BookRepository.java
-│   └── CategoryRepository.java
+│   ├── CategoryRepository.java
+│   ├── OrderRepository.java
+│   └── OrderItemRepository.java
 ├── service/
-│   ├── AuthorService.java            # With soft delete
-│   ├── BookService.java              # With custom validations
-│   └── CategoryService.java
+│   ├── AuthorService.java                 # Standard service
+│   ├── BookService.java                   # With custom validations
+│   ├── CategoryService.java
+│   ├── OrderService.java
+│   └── OrderItemService.java
 ├── vo/
 │   ├── AuthorVO.java
 │   ├── BookVO.java
-│   └── CategoryVO.java
+│   ├── CategoryVO.java
+│   ├── OrderVO.java
+│   └── OrderItemVO.java
 └── AllcrudExampleApplication.java
 ```
 
-## 💡 Dicas de Uso
+## 💡 Best Practices Demonstrated
 
-1. **Soft Delete**: Para entidades que precisam de soft delete, implemente `SoftDeletable` e sobrescreva o método `softDelete()` no service.
+### 1. Soft Delete
+For entities requiring soft delete, use Hibernate's native annotations:
+```java
+@Entity
+@SQLDelete(sql = "UPDATE table_name SET active = false WHERE id = ?")
+@SQLRestriction("active = true")
+public class YourEntity implements AbstractEntity<Long> {
+    @Column(nullable = false)
+    private Boolean active = true;
+}
+```
 
-2. **Validações Customizadas**: Sobrescreva os métodos `create()` e `update()` no service para adicionar validações de negócio.
+**Benefits:**
+- ✅ No custom code needed
+- ✅ Automatically filters inactive records
+- ✅ Data preserved for auditing
+- ✅ Standard Hibernate approach
 
-3. **IDs Customizados**: A Allcrud suporta qualquer tipo de ID. Escolha o mais adequado ao seu domínio.
+### 2. Custom Business Validations
+Override `create()` and `update()` methods in your service:
+```java
+@Override
+@Transactional
+public Book create(Book entity) {
+    validateBook(entity);  // Your custom validation
+    return super.create(entity);
+}
+```
 
-4. **Auditoria**: Para entidades auditáveis, estenda `AuditableEntity` em vez de implementar `AbstractEntity` diretamente.
+### 3. Choosing ID Types
+- **Long**: Traditional databases, performance-critical systems
+- **UUID**: Distributed systems, client-side ID generation
+- **String**: Natural business keys (e.g., "FICTION", "USD")
+- **Composite Key**: Many-to-many relationships, natural composite keys
 
-5. **Testes**: Use as classes base de teste da Allcrud para ter cobertura completa com mínimo esforço.
+### 4. Auditing
+For entities requiring audit trails, extend `AuditableEntity`:
+```java
+@Entity
+public class YourEntity extends AuditableEntity<Long> {
+    // Automatically tracks: createdDate, createdBy, lastUpdatedDate, lastUpdatedBy
+}
+```
 
-## 📚 Recursos Adicionais
+### 5. Testing
+Use Allcrud's base test classes for comprehensive coverage:
+```java
+// Service unit tests
+public class YourServiceTests extends CrudServiceTests<YourEntity, Long> { }
 
-- [Documentação da Allcrud](https://github.com/mathmferreira/allcrud)
+// Controller integration tests (with real PostgreSQL)
+@SpringBootTest
+@AutoConfigureMockMvc
+public class YourControllerTests extends CrudControllerIntegrationTests<YourEntity, YourVO, Long> { }
+```
+
+### 6. Composite Keys
+When working with composite keys:
+1. Create an `@Embeddable` ID class
+2. Extend `AbstractCompositeIdConverter` for URL encoding
+3. Use `@EmbeddedId` and `@MapsId` in your entity
+4. IDs are automatically Base64URL-encoded in REST APIs
+
+## 🔧 Configuration
+
+### H2 Database (Development)
+```properties
+spring.datasource.url=jdbc:h2:mem:allcrud_db
+spring.h2.console.enabled=true
+spring.jpa.hibernate.ddl-auto=create-drop
+```
+
+### Switching to PostgreSQL (Production)
+```properties
+spring.datasource.url=jdbc:postgresql://localhost:5432/allcrud_db
+spring.datasource.username=your_username
+spring.datasource.password=your_password
+spring.jpa.hibernate.ddl-auto=validate
+spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect
+```
+
+## 📚 Additional Resources
+
+- [Allcrud Documentation](https://github.com/astro-techmath/allcrud)
 - [Spring Boot Reference](https://docs.spring.io/spring-boot/docs/current/reference/html/)
 - [Spring Data JPA](https://docs.spring.io/spring-data/jpa/docs/current/reference/html/)
+- [Hibernate @SQLDelete](https://docs.jboss.org/hibernate/orm/current/userguide/html_single/Hibernate_User_Guide.html#mapping-column-sql-delete)
 
-## 🤝 Contribuindo
+## 🤝 Contributing
 
-Este é um projeto exemplo. Para contribuir com a biblioteca Allcrud, visite o [repositório principal](https://github.com/mathmferreira/allcrud).
+This is an example project. To contribute to the Allcrud library itself, visit the [main repository](https://github.com/astro-techmath/allcrud).
 
-## 📄 Licença
+## 📄 License
 
-Este projeto exemplo está sob a mesma licença MIT da biblioteca Allcrud.
+This example project is licensed under the same MIT License as the Allcrud library.
+
+---
+
+**Made with ❤️ using [Allcrud](https://github.com/astro-techmath/allcrud)**
