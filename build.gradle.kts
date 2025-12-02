@@ -19,7 +19,6 @@ configurations {
 
 repositories {
     mavenCentral()
-    mavenLocal()
 }
 
 val restAssuredVersion = "5.5.6"
@@ -28,8 +27,8 @@ val swaggerVersion = "2.8.5"
 
 dependencies {
     // Allcrud library
-    implementation("com.techmath:allcrud:0.1.0-beta")
-    testImplementation(testFixtures("com.techmath:allcrud:0.1.0-beta"))
+    implementation("io.github.astro-techmath:allcrud:0.1.0-beta")
+    testImplementation(testFixtures("io.github.astro-techmath:allcrud:0.1.0-beta"))
     
     // Spring Boot
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
