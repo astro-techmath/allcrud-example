@@ -82,7 +82,7 @@ Two levels of testing using Allcrud's base classes:
 ```
 No publish step is needed. See [Local Development](#local-development).
 
-**Option B: Use from Maven Central (when published)**
+**Option B: Use from Maven Central**
 ```gradle
 dependencies {
     implementation 'io.github.astro-techmath:allcrud:0.2.1'
