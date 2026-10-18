@@ -71,21 +71,21 @@ Two levels of testing using Allcrud's base classes:
 
 ### Prerequisites
 - Java 21+
-- Gradle 8.7+
+- Gradle 9.8.1 (wrapper)
 - Docker (for integration tests)
 
 ### Installation
 
-**Option A: Install Allcrud locally (for development)**
+**Option A: Build against a local Allcrud clone (for development)**
 ```bash
-cd /path/to/allcrud
-./gradlew publishToMavenLocal
+./gradlew build -PallcrudLocalPath=/path/to/allcrud
 ```
+No publish step is needed. See [Local Development](#local-development).
 
-**Option B: Use from Maven Central (when published)**
-```gradle
+**Option B: Use from Maven Central**
+```kotlin
 dependencies {
-    implementation 'com.techmath:allcrud:0.1.0-beta'
+    implementation("io.github.astro-techmath:allcrud:0.2.1")
 }
 ```
 
@@ -97,6 +97,30 @@ cd allcrud-example
 ```
 
 The application will be available at `http://localhost:8080`
+
+### Local Development
+
+To build the example against local clones of [allcrud](https://github.com/astro-techmath/allcrud) or [allcrud-generator](https://github.com/astro-techmath/allcrud-generator) instead of the published artifacts, pass their paths as Gradle properties. Each property adds the clone as a [composite build](https://docs.gradle.org/current/userguide/composite_builds.html). Without the properties, the build resolves everything from Maven Central as usual.
+
+| Property | Effect |
+|---|---|
+| `allcrudLocalPath` | Replaces `io.github.astro-techmath:allcrud` (including its test fixtures) with the local build |
+| `allcrudGeneratorLocalPath` | Resolves the `io.github.astro-techmath.allcrud-generator` Gradle plugin from the local build |
+
+```bash
+./gradlew build -PallcrudLocalPath=../allcrud
+./gradlew build -PallcrudLocalPath=../allcrud -PallcrudGeneratorLocalPath=../allcrud-generator
+```
+
+To confirm the substitution:
+
+```bash
+./gradlew dependencies --configuration runtimeClasspath -PallcrudLocalPath=../allcrud | grep "project ':allcrud'"
+```
+
+The example does not apply the generator plugin yet, so `allcrudGeneratorLocalPath` only has an effect once a build script applies `id("io.github.astro-techmath.allcrud-generator")`.
+
+In a composite build, Gradle applies dependency verification only from the root build's `gradle/verification-metadata.xml`. An included build's own file is ignored. This repository has no such file, so dependencies resolved for the included builds are not verified.
 
 ### Accessing H2 Console
 
