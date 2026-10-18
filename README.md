@@ -71,7 +71,7 @@ Two levels of testing using Allcrud's base classes:
 
 ### Prerequisites
 - Java 21+
-- Gradle 8.7+
+- Gradle 9.8.1 (wrapper)
 - Docker (for integration tests)
 
 ### Installation
@@ -85,7 +85,7 @@ No publish step is needed. See [Local Development](#local-development).
 **Option B: Use from Maven Central (when published)**
 ```gradle
 dependencies {
-    implementation 'com.techmath:allcrud:0.1.0-beta'
+    implementation 'io.github.astro-techmath:allcrud:0.2.1'
 }
 ```
 
