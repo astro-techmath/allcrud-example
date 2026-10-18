@@ -83,9 +83,9 @@ Two levels of testing using Allcrud's base classes:
 No publish step is needed. See [Local Development](#local-development).
 
 **Option B: Use from Maven Central**
-```gradle
+```kotlin
 dependencies {
-    implementation 'io.github.astro-techmath:allcrud:0.2.1'
+    implementation("io.github.astro-techmath:allcrud:0.2.1")
 }
 ```
 
