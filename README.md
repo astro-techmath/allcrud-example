@@ -76,11 +76,11 @@ Two levels of testing using Allcrud's base classes:
 
 ### Installation
 
-**Option A: Install Allcrud locally (for development)**
+**Option A: Build against a local Allcrud clone (for development)**
 ```bash
-cd /path/to/allcrud
-./gradlew publishToMavenLocal
+./gradlew build -PallcrudLocalPath=/path/to/allcrud
 ```
+No publish step is needed. See [Local Development](#local-development).
 
 **Option B: Use from Maven Central (when published)**
 ```gradle
