@@ -170,7 +170,7 @@ public class BookControllerIntegrationTests extends CrudControllerIntegrationTes
             .when().post(basePath)
             .then().log().ifValidationFails()
             .assertThat()
-                .statusCode(HttpStatus.UNPROCESSABLE_ENTITY.value())
+                .statusCode(HttpStatus.UNPROCESSABLE_CONTENT.value())
                 .body("[0].description", containsStringIgnoringCase("inactive author"));
     }
 
