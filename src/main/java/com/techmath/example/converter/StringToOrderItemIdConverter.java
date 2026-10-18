@@ -1,9 +1,9 @@
 package com.techmath.example.converter;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.techmath.allcrud.converter.AbstractCompositeIdConverter;
 import com.techmath.example.entity.pk.OrderItemId;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.ObjectMapper;
 
 @Component
 public class StringToOrderItemIdConverter extends AbstractCompositeIdConverter<OrderItemId> {

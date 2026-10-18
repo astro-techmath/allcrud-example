@@ -1,6 +1,5 @@
 package com.techmath.example.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.techmath.allcrud.controller.CrudControllerIntegrationTests;
 import com.techmath.allcrud.converter.Converter;
 import com.techmath.allcrud.repository.EntityRepository;
@@ -17,8 +16,8 @@ import org.instancio.Instancio;
 import org.instancio.Select;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -61,7 +60,7 @@ public class BookControllerIntegrationTests extends CrudControllerIntegrationTes
 
     @Test
     @Override
-    public void givenValidVO_whenCreate_thenReturnStatus201AndPersistedEntity() throws JsonProcessingException {
+    public void givenValidVO_whenCreate_thenReturnStatus201AndPersistedEntity() {
         Author author = authorRepository.save(Instancio.of(Author.class).withSettings(settings)
                 .ignore(Select.field(Author::getId))
                 .ignore(Select.field(Author::getCreatedDate))
@@ -100,7 +99,7 @@ public class BookControllerIntegrationTests extends CrudControllerIntegrationTes
     }
 
     @Override
-    public void givenExistingEntity_whenUpdate_thenReturnStatus200AndUpdatedEntity() throws JsonProcessingException {
+    public void givenExistingEntity_whenUpdate_thenReturnStatus200AndUpdatedEntity() {
         BookVO voCreated = createEntity();
         UUID id = voCreated.getId();
 
@@ -176,7 +175,7 @@ public class BookControllerIntegrationTests extends CrudControllerIntegrationTes
     }
 
     @Override
-    protected BookVO createEntity() throws JsonProcessingException {
+    protected BookVO createEntity() {
         Author author = authorRepository.save(Instancio.of(Author.class).withSettings(settings)
                 .ignore(Select.field(Author::getId))
                 .ignore(Select.field(Author::getCreatedDate))
