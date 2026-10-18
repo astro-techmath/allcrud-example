@@ -1,6 +1,6 @@
 plugins {
     java
-    id("org.springframework.boot") version "3.5.6"
+    id("org.springframework.boot") version "4.1.0"
     id("io.spring.dependency-management") version "1.1.7"
 }
 
@@ -21,14 +21,14 @@ repositories {
     mavenCentral()
 }
 
-val restAssuredVersion = "5.5.6"
-val instancioVersion = "5.4.1"
-val swaggerVersion = "2.8.5"
+val restAssuredVersion = "6.0.1"
+val instancioVersion = "5.6.0"
+val swaggerVersion = "3.1.1"
 
 dependencies {
     // Allcrud library
-    implementation("io.github.astro-techmath:allcrud:0.1.0-beta")
-    testImplementation(testFixtures("io.github.astro-techmath:allcrud:0.1.0-beta"))
+    implementation("io.github.astro-techmath:allcrud:0.2.1")
+    testImplementation(testFixtures("io.github.astro-techmath:allcrud:0.2.1"))
     
     // Spring Boot
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
@@ -45,10 +45,12 @@ dependencies {
     
     // Testing
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
     testImplementation("io.rest-assured:spring-mock-mvc:$restAssuredVersion")
     testImplementation("org.instancio:instancio-junit:$instancioVersion")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testRuntimeOnly("org.postgresql:postgresql")
+    testRuntimeOnly("org.testcontainers:testcontainers-postgresql")
 }
 
 tasks.withType<Test> {

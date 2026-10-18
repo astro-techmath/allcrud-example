@@ -1,6 +1,5 @@
 package com.techmath.example.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.techmath.allcrud.controller.CrudControllerIntegrationTests;
 import com.techmath.allcrud.converter.Converter;
 import com.techmath.allcrud.repository.EntityRepository;
@@ -12,8 +11,8 @@ import io.restassured.http.ContentType;
 import org.instancio.Instancio;
 import org.instancio.Select;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -45,7 +44,7 @@ public class AuthorControllerIntegrationTests extends CrudControllerIntegrationT
     }
 
     @Override
-    protected AuthorVO createEntity() throws JsonProcessingException {
+    protected AuthorVO createEntity() {
         AuthorVO voToCreate = Instancio.of(AuthorVO.class).withSettings(settings)
                 .set(Select.field(AuthorVO::getActive), true)
                 .create();
